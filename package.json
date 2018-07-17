@@ -1,0 +1,24 @@
+{
+  "name": "ruther-quest",
+  "version": "1.0.0",
+  "description": "A tiny game",
+  "main": "src/index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack-dev-server",
+    "build": "webpack",
+    "watch": "webpack --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HelloWorld017/RutherQuest.git"
+  },
+  "author": "Khinenw",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/HelloWorld017/RutherQuest/issues"
+  },
+  "homepage": "https://github.com/HelloWorld017/RutherQuest#readme"
+}
