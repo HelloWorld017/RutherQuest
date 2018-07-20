@@ -18,11 +18,11 @@ class EntityElectron extends Entity {
 		const motions = [];
 		this.game.obstacles.forEach(v => {
 			v.getSides().forEach(([p1, p2]) => {
-				const u = p2.clone().substract(p1);
+				const u = p2.clone().subtract(p1);
 
 				const distance = Math.abs(this.cross(u) + u.cross(p1)) / u.size();
 
-				const d1 = this.clone().substract(p1).dot(u.clone().normalize());
+				const d1 = this.clone().subtract(p1).dot(u.clone().normalize());
 
 				if(distance <= this.radius && d1 >= -this.radius && d1 <= u.size() + this.radius) {
 					motions.push([u.reflect(this.motion), distance]);
@@ -60,10 +60,6 @@ class EntityElectron extends Entity {
 			}, [new Vector2(0, 0), Infinity])[0];
 
 			this.motion = finalMotion.normalize().multiply(4);
-		}
-
-		if(this.clone().substract(this.game.center).size() > 250) {
-			this.motion.multiply(0);
 		}
 	}
 

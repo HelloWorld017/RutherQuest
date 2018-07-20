@@ -20,19 +20,56 @@ class Game {
 		this.updateBound = this.update.bind(this);
 		this.update();
 
-		this.initObstacle([
-			[new Vector2(-30, -30), new Vector2(30, -60), new Vector2(30, 30), new Vector2(-30, 60)],
-			[
-				new Vector2(-120, -30), new Vector2(-90, -60), new Vector2(-60, -30),
-				new Vector2(-60, 30), new Vector2(-90, 60), new Vector2(-120, 30)
-			]
-		]);
+		this.candidates = [
+			[[new Vector2(-30, -30), new Vector2(30, -60), new Vector2(30, 30), new Vector2(-30, 60)]],
+			[[new Vector2(-45, -45), new Vector2(45, -45), new Vector2(45, 45), new Vector2(-45, 45)]],
+			[[
+				new Vector2(-30, -30), new Vector2(0, -60), new Vector2(30, -30),
+				new Vector2(30, 30), new Vector2(0, 60), new Vector2(-30, 30)
+			]],
+			[[new Vector2(-30, 30), new Vector2(-60, -30), new Vector2(30, -30), new Vector2(60, 30)]],
+		];
+
+		this.newQuestion();
 
 		this.drag = false;
 		this.dragStart = undefined;
 		this.dragEnd = undefined;
 
 		this.attachListener();
+
+		const candidates = document.querySelector('.Candidates');
+
+		this.candidates.forEach((v, i) => {
+			const elem = document.createElement('div');
+			elem.classList.add('Candidates__val');
+			elem.innerHTML = this.exportShapeToSvg(v);
+			elem.addEventListener('mousedown', ev => {
+				ev.preventDefault();
+				ev.stopPropagation();
+			});
+			elem.addEventListener('mouseup', ev => {
+				ev.preventDefault();
+				ev.stopPropagation();
+
+				if(this.answer) {
+					return;
+				}
+
+				const isCorrect = this.candidates[i].every((polygon, i2) => {
+					return polygon.every((point, i3) => {
+						return point.equals(this.obstaclePolygon[i2][i3]);
+					});
+				});
+
+				if(isCorrect) this.answer = 'correct';
+				else this.answer = 'wrong';
+
+				this.handleAnswer();
+			});
+
+			candidates.appendChild(elem);
+		});
 	}
 
 	get width() {
@@ -58,6 +95,12 @@ class Game {
 				this.dragEnd = new Vector2(clientX, clientY);
 			}
 		});
+
+		document.addEventListener('keydown', ({key}) => {
+			if(key === ' ' && this.answer) {
+				this.newQuestion();
+			}
+		});
 	}
 
 	update() {
@@ -68,12 +111,13 @@ class Game {
 			v.render(this.ctx);
 		});
 
-
-		this.ctx.fillStyle = '#f1f2f3';
-		this.ctx.fillRect(this.width / 2 - 100, this.height / 2 - 100, 200, 200);
+		if(!this.answer) this.renderBlind();
 
 		this.deathNote.forEach(e => {
 			e.setDead();
+			if(this.obstacles.includes(e)) {
+				this.obstacles.splice(this.obstacles.indexOf(e), 1);
+			}
 			delete this.entities[e.entityId];
 		});
 		this.deathNote = [];
@@ -87,7 +131,7 @@ class Game {
 		if(!this.dragEnd || this.dragEnd.equals(this.dragStart)) return;
 
 		const electron = new EntityElectron(this, this.dragStart.clone(), 10);
-		electron.motion = this.dragEnd.clone().substract(this.dragStart).normalize().multiply(4);
+		electron.motion = this.dragEnd.clone().subtract(this.dragStart).normalize().multiply(4);
 
 		this.spawn(electron);
 	}
@@ -99,7 +143,7 @@ class Game {
 		if(this.drag && this.dragEnd) {
 			const dragVector = this.dragEnd
 				.clone()
-				.substract(this.dragStart)
+				.subtract(this.dragStart)
 				.normalize()
 				.multiply(100)
 				.add(this.dragStart);
@@ -118,6 +162,17 @@ class Game {
 		}
 	}
 
+	renderBlind() {
+		this.ctx.fillStyle = '#e1e2e3';
+		this.ctx.fillRect(this.width / 2 - 100, this.height / 2 - 100, 200, 200);
+
+		this.ctx.fillStyle = '#202020';
+		this.ctx.font = '40px Gothic A1';
+		this.ctx.textAlign = 'center';
+		this.ctx.textBaseline = 'middle';
+		this.ctx.fillText('?', this.width / 2, this.height / 2);
+	}
+
 	initObstacle(polygons) {
 		polygons.forEach(polygon => {
 			const obstacle = new EntityObstacle(this, new Vector2(this.width / 2, this.height / 2), polygon);
@@ -133,6 +188,58 @@ class Game {
 
 	despawn(entity) {
 		this.deathNote.push(entity);
+	}
+
+	newQuestion() {
+		this.answer = undefined;
+		this.obstacles.forEach(v => this.despawn(v));
+		this.obstaclePolygon = this.candidates[Math.floor(Math.random() * this.candidates.length)];
+		this.initObstacle(this.obstaclePolygon);
+	}
+
+	exportShapeToSvg(polygons, size=150) {
+		let exportData = `<svg width="${size}" height="${size}">`;
+		polygons.forEach(polygon => {
+			const start = polygon[polygon.length - 1];
+			const offset = size / 2;
+
+			exportData += `<path d="M${offset + start.x},${offset + start.y} `;
+
+			polygon.forEach(position => {
+				exportData += `L${offset + position.x},${offset + position.y} `;
+			});
+
+			exportData += '" fill="#e91e63"/>';
+		});
+
+		return exportData + "</svg>";
+	}
+
+	handleAnswer() {
+		const app = document.querySelector('.App');
+		const alertContainer = document.createElement('div');
+		alertContainer.classList.add('Alert');
+
+		if(this.answer === 'correct') {
+			alertContainer.innerText = '○ 정답입니다!';
+		} else {
+			alertContainer.innerText = '× 틀렸습니다.';
+		}
+
+		app.appendChild(alertContainer);
+
+		setTimeout(() => alertContainer.classList.add('Alert--shown'), 10);
+		setTimeout(() => alertContainer.classList.remove('Alert--shown'), 2000);
+		setTimeout(() => app.removeChild(alertContainer), 3000);
+	}
+
+	toggleUi() {
+		const app = document.querySelector('.App');
+		if(app.classList.contains('App--hidden')) {
+			app.classList.remove('App--hidden');
+		} else {
+			app.classList.add('App--hidden');
+		}
 	}
 }
 

@@ -3,20 +3,81 @@
 	<head>
 		<meta charset="utf-8">
 		<title>RutherQuest</title>
+		<link href="https://fonts.googleapis.com/css?family=Gothic+A1:100,400" rel="stylesheet">
 
 		<style>
+			body, html {
+				padding: 0;
+				margin: 0;
+			}
+
 			canvas {
-				position: fixed;
+				display: block;
+			}
+
+			.App {
+				position: absolute;
 				top: 0;
 				left: 0;
-				bottom: 0;
 				right: 0;
+				bottom: 0;
+			}
+
+			.App--hidden {
+				display: none;
+			}
+
+			.Alert {
+				position: fixed;
+				top: 50%;
+				left: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: #fff;
+				font-family: 'Gothic A1', sans-serif;
+				font-size: 3rem;
+				font-weight: 100;
+				padding: 50px;
+				background: rgba(0, 0, 0, .7);
+				transform: translate(-50%, -50%);
+				opacity: 0;
+				transition: all 1s ease;
+			}
+
+			.Alert--shown {
+				opacity: 1;
+			}
+
+			.Candidates {
+				position: relative;
+				counter-reset: candidate;
+			}
+
+			.Candidates {
+				display: flex;
+				align-items: stretch;
+			}
+
+			.Candidates__val {
+				margin-left: 20px;
+			}
+
+			.Candidates__val::before {
+				display: block;
+				content: "#" counter(candidate);
+				counter-increment: candidate;
 			}
 		</style>
 	</head>
 
 	<body>
 		<canvas></canvas>
+
+
+		<main class="App">
+			<div class="Candidates"></div>
+		</main>
 
 		<script src="/dist/ruther.bundle.js"></script>
 	</body>

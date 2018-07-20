@@ -20,5 +20,7 @@ module.exports = {
 		}]
 	},
 
+	mode: process.env.NODE_ENV || 'development',
+
 	devtool: '#eval-source-map'
 };

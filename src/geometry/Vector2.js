@@ -11,7 +11,7 @@ class Vector2 {
 		return this;
 	}
 
-	substract(vec2) {
+	subtract(vec2) {
 		this.add(vec2.clone().multiply(-1));
 
 		return this;
@@ -49,7 +49,7 @@ class Vector2 {
 
 	reflect(motion) {
 		const perp = this.perp().normalize();
-		return perp.multiply(perp.dot(motion) * 2).substract(motion).multiply(-1);
+		return perp.multiply(perp.dot(motion) * 2).subtract(motion).multiply(-1);
 	}
 
 	clone() {
