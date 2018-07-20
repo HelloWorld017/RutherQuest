@@ -9,6 +9,7 @@ class Game {
 
 		this.canvas.width = window.innerWidth;
 		this.canvas.height = window.innerHeight;
+		this.center = new Vector2(this.width / 2, this.height / 2);
 
 		this.entities = {};
 		this.lastEntityId = 0;
@@ -20,7 +21,11 @@ class Game {
 		this.update();
 
 		this.initObstacle([
-			[new Vector2(-30, -30), new Vector2(30, -60), new Vector2(30, 30), new Vector2(-30, 60)]
+			[new Vector2(-30, -30), new Vector2(30, -60), new Vector2(30, 30), new Vector2(-30, 60)],
+			[
+				new Vector2(-120, -30), new Vector2(-90, -60), new Vector2(-60, -30),
+				new Vector2(-60, 30), new Vector2(-90, 60), new Vector2(-120, 30)
+			]
 		]);
 
 		this.drag = false;
@@ -62,6 +67,10 @@ class Game {
 			v.update();
 			v.render(this.ctx);
 		});
+
+
+		this.ctx.fillStyle = '#f1f2f3';
+		this.ctx.fillRect(this.width / 2 - 100, this.height / 2 - 100, 200, 200);
 
 		this.deathNote.forEach(e => {
 			e.setDead();

@@ -37,8 +37,10 @@ class Vector2 {
 	}
 
 	matmul(twobytwo) {
+		const _x = this.x;
+
 		this.x = twobytwo[0][0] * this.x + twobytwo[0][1] * this.y;
-		this.y = twobytwo[1][0] * this.x + twobytwo[1][1] * this.y;
+		this.y = twobytwo[1][0] * _x + twobytwo[1][1] * this.y;
 	}
 
 	perp() {

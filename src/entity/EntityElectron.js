@@ -7,7 +7,6 @@ class EntityElectron extends Entity {
 
 		this.radius = radius;
 		this.boundModelAccuracy = 6;
-		this.lastVector = undefined;
 		this.friction = 0;
 		this.threshold = 1000;
 	}
@@ -21,13 +20,13 @@ class EntityElectron extends Entity {
 			v.getSides().forEach(([p1, p2]) => {
 				const u = p2.clone().substract(p1);
 
-				const distance = Math.abs(u.y * this.x - u.x * this.y +  u.x * p1.y - u.y * p1.x)
-					/ u.size();
+				const distance = Math.abs(this.cross(u) + u.cross(p1)) / u.size();
 
 				const d1 = this.clone().substract(p1).dot(u.clone().normalize());
 
 				if(distance <= this.radius && d1 >= -this.radius && d1 <= u.size() + this.radius) {
 					motions.push([u.reflect(this.motion), distance]);
+					this.add(u.perp().normalize().multiply(distance));
 				}
 			});
 		});
@@ -41,11 +40,9 @@ class EntityElectron extends Entity {
 						previousMotion.cross(curr[0]) / (previousMotion.size() * curr[0].size())
 					);
 
-					const thetaDiff2 = Math.asin(
+					const thetaDiff2 = -Math.asin(
 						previousMotion.cross(prev[0]) / (previousMotion.size() * prev[0].size())
 					);
-
-					console.log(thetaDiff1 / Math.PI * 180, thetaDiff2 / Math.PI * 180);
 
 					const newMotion = previousMotion.clone().multiply(-1);
 					const newTheta = (thetaDiff1 + thetaDiff2) / 2;
@@ -63,15 +60,11 @@ class EntityElectron extends Entity {
 			}, [new Vector2(0, 0), Infinity])[0];
 
 			this.motion = finalMotion.normalize().multiply(4);
-
-			if(this.lastVector !== undefined) {
-				//this.x = this.lastVector.x;
-				//this.y = this.lastVector.y;
-			}
-			this.add(this.motion);
 		}
 
-		this.lastVector = this.clone();
+		if(this.clone().substract(this.game.center).size() > 250) {
+			this.motion.multiply(0);
+		}
 	}
 
 	render(ctx) {
